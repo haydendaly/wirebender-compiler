@@ -6,7 +6,7 @@
     )))
 )
 
-(var num_sides 10)
+(var num_sides 5)
 
 (polygon num_sides)
 

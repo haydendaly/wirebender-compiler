@@ -21,13 +21,17 @@ This will take in `/input/script.wire` and output the compiled code to `/output/
 The language includes recursion by adopting a Lisp syntax.
 
 ```
-(var num_times 4)
-(var bend_angle (/ 360 num_times))
+(def polygon (sides)
+    ((var bend_angle (/ 360 sides))
+    (repeat sides (
+        (feed 2)
+        (bend bend_angle)
+    )))
+)
 
-(repeat num_times (
-    (feed 2)
-    (bend bend_angle)
-))
+(var num_sides 5)
+
+(polygon num_sides)
 
 (rotate 90)
 
@@ -38,13 +42,15 @@ This compiles to the following:
 
 ```
 feed 2
-bend 90.0
+bend 72.0
 feed 2
-bend 90.0
+bend 72.0
 feed 2
-bend 90.0
+bend 72.0
 feed 2
-bend 90.0
+bend 72.0
+feed 2
+bend 72.0
 rotate 90
 feed 100
 ```
