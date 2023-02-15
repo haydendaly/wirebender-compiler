@@ -1,4 +1,4 @@
-(var num_times 10)
+(var num_times 4)
 (var bend_angle (/ 360 num_times))
 
 (repeat num_times (
