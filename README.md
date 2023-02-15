@@ -1,5 +1,13 @@
 # Compiler for Wire Bender Language
 
+## Setup
+
+```sh
+$ virtualenv fab
+$ source fab/bin/activate
+$ pip install -r requirements.txt
+```
+
 ## Usage
 
 ```sh
