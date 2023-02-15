@@ -1,36 +1,42 @@
-class Token:
-    def __init__(line):
-        tokens = line.split(" ")
-        self.type = tokens[0]
-        self.args = tokens[1:]
-        self.children = []
-        pass
-
-    def __tostring__():
-        return self.type + " " + " ".join(self.args)
-
 # todo use formal parser
 def parser(str):
-    tokens = [line.split(" ") for line in str.splitlines()]
+    return [["repeat", 2, [["feed", 2], ["bend", 3.6]], ["feed", 10]]]
 
-    i = 0
-    lines = str.splitlines()
-    tokens = []
-    while i < len(lines):
-        token = new Token(lines[i])
-        if token.type == "repeat":
-            i += 1
-            while lines[i] != "end":
-                token.children.append(new Token(lines[i]))
-                i += 1
+class Scope:
+    def __init__(self, parent_scope = None):
+        self.variables = {}
+        self.parent_scope = parent_scope
 
-        tokens.append(token)
+    def get(self, name):
+        if name in self.variables:
+            return self.variables[name]
+        elif self.parent_scope:
+            return self.parent_scope.get(name)
+        return None
 
-    tokens_as_strs = map(lambda x: x.__tostring__(), tokens)
-    return "\n".join(map(lambda x: new Token(x), tokens))
+    def set(self, name, value):
+        if name in self.variables:
+            # throw an err
+            raise Exception(f"Variable `{name}` already exists in scope")
+        self.variables[name] = value
 
 def interpreter(tokens):
-    return output
+    result = []
+    scope = Scope()
+
+    for token in tokens:
+        if token[0] == "feed":
+            result.append(f"feed {token[1]}")
+        elif token[0] == "bend":
+            result.append(f"bend {token[1]}")
+        elif token[0] == "repeat":
+            for i in range(token[1]):
+                local_result = interpreter(token[2])
+                for line in local_result:
+                    result.append(line)
+        elif token[0] == "var":
+            scope.set(token[1], token[2])
+    return result
 
 if __name__ == "__main__":
     output = None
@@ -38,4 +44,7 @@ if __name__ == "__main__":
         tokens = parser(f.read())
         output = interpreter(tokens)
     with open("output.txt", "w") as f:
-        f.write(output)
+        for line in output:
+            f.write(line)
+            f.write("\n")
+        f.write("\n".join(output))
