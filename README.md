@@ -11,10 +11,10 @@ $ pip install -r requirements.txt
 ## Usage
 
 ```sh
-$ python3 main.py -f /input/script.wire
+$ python3 src/main.py
 ```
 
-Will output compiled `/output/script.wirec`
+This will take in `/input/script.wire` and output the compiled code to `/output/script.wirec`
 
 ## Example Program
 
