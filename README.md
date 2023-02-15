@@ -3,10 +3,10 @@
 ## Usage
 
 ```sh
-$ python3 main.py -f /input/script.txt
+$ python3 main.py -f /input/script.wire
 ```
 
-Will output compiled `/output/script.txt`
+Will output compiled `/output/script.wirec`
 
 ## Commands
 
@@ -16,7 +16,7 @@ Repeat the nested command `N` times. `end` must be used to end the repeat block.
 
 ### `feed N`
 
-Feed the machien forward by `N` units.
+Feed the machine forward by `N` units.
 
 ### `bend N`
 
