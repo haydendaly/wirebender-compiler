@@ -22,8 +22,10 @@ class Interpreter:
             # variables
             if type(token) == str:
                 return scope.get(tokens)
+
             method = token[0]
             if method == "var":
+                # TODO: we want to add function declaration here
                 scope.set(token[1], _eval(token[2]))
             # primitives
             elif method in PRIMITIVES:
@@ -45,6 +47,13 @@ class Interpreter:
                     return val_1 * val_2
                 elif method == "/":
                     return val_1 / val_2
+            # elif scope.get(method):
+            #     # TODO: add function invokation here
+            #     func = scope.get(method)
+            #     args = []
+            #     for arg in token[1:]:
+            #         args.append(_eval(arg))
+            #     return func(*args)
             else:
                 raise Exception(f"Unknown token `{method}`")
 
