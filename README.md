@@ -26,12 +26,17 @@ Bend the wire by `N` degrees.
 
 Rotate the wire by `N` degrees.
 
+### `var NAME N`
+
+Define a variable `NAME` with value `N`.
+
 ## Example Script
 
 ```
 feed 10
+var num_rotations
 
-repeat 100
+repeat num_rotations
     feed 2
     bend 3.6
 end
