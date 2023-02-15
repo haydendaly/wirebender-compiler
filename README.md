@@ -34,11 +34,12 @@ Define a variable `NAME` with value `N`.
 
 ```
 feed 10
-var num_rotations
+var num_times 10
+var bend_angle (/ 360 num_times)
 
-repeat num_rotations
+repeat num_times
     feed 2
-    bend 3.6
+    bend bend_angle
 end
 
 rotate 90
