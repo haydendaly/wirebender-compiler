@@ -1,10 +1,14 @@
-(var num_times 4)
-(var bend_angle (/ 360 num_times))
+(def polygon (sides)
+    ((var bend_angle (/ 360 sides))
+    (repeat sides (
+        (feed 2)
+        (bend bend_angle)
+    )))
+)
 
-(repeat num_times (
-    (feed 2)
-    (bend bend_angle)
-))
+(var num_sides 10)
+
+(polygon num_sides)
 
 (rotate 90)
 
