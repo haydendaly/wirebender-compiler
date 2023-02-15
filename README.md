@@ -59,7 +59,7 @@ feed 100
 
 ### `repeat N`
 
-Repeat the nested command `N` times. `end` must be used to end the repeat block.
+Repeat the nested command `N` times. `end` must be used to end the repeat block. We `eval` out this directly and write it `N` times in the output -- we can toggle this.
 
 ### `feed N`
 
