@@ -33,16 +33,16 @@ Define a variable `NAME` with value `N`.
 ## Example Script
 
 ```
-feed 10
-var num_times 10
-var bend_angle (/ 360 num_times)
+(feed 10)
+(var num_times 10)
+(var bend_angle (/ 360 num_times))
 
-repeat num_times
-    feed 2
-    bend bend_angle
-end
+(repeat num_times (
+    (feed 2)
+    (bend bend_angle)
+))
 
-rotate 90
+(rotate 90)
 
-feed 100
+(feed 100)
 ```

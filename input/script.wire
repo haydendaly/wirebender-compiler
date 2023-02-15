@@ -1,6 +1,11 @@
-repeat 100
-feed 5
-bend 2
-end
+(var num_times 10)
+(var bend_angle (/ 360 num_times))
 
-feed 5
+(repeat num_times (
+    (feed 2)
+    (bend bend_angle)
+))
+
+(rotate 90)
+
+(feed 100)
