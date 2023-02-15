@@ -20,7 +20,7 @@ This will take in `/input/script.wire` and output the compiled code to `/output/
 
 The language includes recursion by adopting a Lisp syntax.
 
-```
+```lisp
 (def polygon (sides)
     ((var bend_angle (/ 360 sides))
     (repeat sides (
