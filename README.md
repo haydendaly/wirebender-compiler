@@ -1,5 +1,13 @@
 # Compiler for Wire Bender Language
 
+## Usage
+
+```sh
+$ python3 main.py -f /input/script.txt
+```
+
+Will output compiled `/output/script.txt`
+
 ## Commands
 
 ### `repeat N`
