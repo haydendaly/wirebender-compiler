@@ -1,15 +1,17 @@
-(def polygon (sides)
-    ((var bend_angle (/ 360 sides))
+# Variable declaration
+(var arr [2 7 1 8 2 8 1 8 2 8])
+(var i (// (* (rand) (len arr)) 3))
+(feed (* (get arr i) 100))
+
+# Function declaration
+(def polygon (sides) (
+    (var interior_angle (/ (* (- (* 2 sides) 4) 90) sides))
     (repeat sides (
         (feed 2)
-        (bend bend_angle)
-    )))
-)
+        (bend interior_angle)
+    ))
+))
+(polygon 3)
 
-(var num_sides 5)
-
-(polygon num_sides)
-
-(rotate 90)
-
-(feed 100)
+# Simple math
+(feed (* (cos (rand)) 100))

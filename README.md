@@ -21,58 +21,91 @@ This will take in `/input/script.wire` and output the compiled code to `/output/
 The language includes recursion by adopting a Lisp syntax.
 
 ```lisp
-(def polygon (sides)
-    ((var bend_angle (/ 360 sides))
+# Variable declaration
+(var arr [2 7 1 8 2 8 1 8 2 8])
+(var i (// (* (rand) (len arr)) 3))
+(feed (* (get arr i) 100))
+
+# Function declaration
+(def polygon (sides) (
+    (var interior_angle (/ (* (- (* 2 sides) 4) 90) sides))
     (repeat sides (
         (feed 2)
-        (bend bend_angle)
-    )))
-)
+        (bend interior_angle)
+    ))
+))
+(polygon 3)
 
-(var num_sides 5)
-
-(polygon num_sides)
-
-(rotate 90)
-
-(feed 100)
+# Simple math
+(feed (* (cos (rand)) 100))
 ```
 
 This compiles to the following:
 
 ```
-feed 2
-bend 72.0
-feed 2
-bend 72.0
-feed 2
-bend 72.0
-feed 2
-bend 72.0
-feed 2
-bend 72.0
-rotate 90
 feed 100
+feed 2
+bend 60.0
+feed 2
+bend 60.0
+feed 2
+bend 60.0
+feed 98.10696726812708
 ```
 
-## Language Features
+## Symbols
 
-### `repeat N`
+### Primitives
 
-Repeat the nested command `N` times. `end` must be used to end the repeat block. We `eval` out this directly and write it `N` times in the output -- we can toggle this.
+One arg: `feed`, `bend`, `rotate`
 
-### `feed N`
+### Math
 
-Feed the machine forward by `N` units.
+Two args: `+`, `-`, `*`, `/`, `%`, `**`, `//`
+One arg: `cos`, `sin`, `tan`, `acos`, `asin`, `atan`, `sqrt`, `abs`, `rand`, `log`, `log10`
 
-### `bend N`
+```lisp
+(+ 1 (cos 0))
+```
 
-Bend the wire by `N` degrees.
+### Logic
 
-### `rotate N`
+Two args: `==`, `!=`, `>`, `<`, `>=`, `<=`
+One arg: `not`
 
-Rotate the wire by `N` degrees.
+#### Control Flow (wip)
 
-### `var NAME N`
+Three args: `ifelse`
+Two args: `repeat`
 
-Define a variable `NAME` with value `N`.
+```lisp
+(ifelse (== (% 20 3) 1) (
+    (feed 1)
+) (
+    (repeat 20 (
+        (feed 2)
+        (bend 1)
+    ))
+))
+```
+
+### Variables
+
+`var`, `get`, `set`, `len`
+
+```lisp
+(var arr [1 2 3])
+(var last (- (len arr) 1))
+(set arr last 4)
+(feed (get arr last))
+```
+
+### Functions
+
+`def`
+
+```lisp
+(def foo (x) (
+    (feed x)
+))
+```

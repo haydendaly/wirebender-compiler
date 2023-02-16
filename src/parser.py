@@ -2,22 +2,27 @@
 def tokenize(chars):
     return chars.replace('(', ' ( ').replace(')', ' ) ').split()
 
-def parse(program):
-    tokens = tokenize(program)
-    return read_from_tokens(tokens)
+def parse(raw):
+    # remove comments
+    lines = raw.split("\n")
+    semi_parsed = " ".join(list(filter(lambda s: s and s[0] != '#', lines)))
+    parsed = semi_parsed.replace("\t", " ")
+    # wrapped in list to make it a list of tokens
+    program = f"({parsed})"
+    return read_tokens(tokenize(program))
 
-def read_from_tokens(tokens):
+def read_tokens(tokens):
     if len(tokens) == 0:
-        raise SyntaxError('unexpected EOF while reading')
+        raise SyntaxError('Unexpected EOF while reading')
     token = tokens.pop(0)
     if '(' == token:
-        L = []
+        segment = []
         while tokens[0] != ')':
-            L.append(read_from_tokens(tokens))
+            segment.append(read_tokens(tokens))
         tokens.pop(0)
-        return L
+        return segment
     elif ')' == token:
-        raise SyntaxError('unexpected )')
+        raise SyntaxError('Unexpected `)`')
     else:
         return atom(token)
 
@@ -27,7 +32,3 @@ def atom(token):
         try: return float(token)
         except ValueError:
             return str(token)
-
-
-def parse_hardcoded(str):
-    return [["var", "num_times", 10], ["var", "bend_angle", ["/", 360, "num_times"]], ["repeat", "num_times", [["feed", 2], ["bend", "bend_angle"]], ["feed", 10]]]

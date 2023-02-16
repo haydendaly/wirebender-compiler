@@ -1,12 +1,8 @@
+feed 700
 feed 2
-bend 72.0
+bend 60.0
 feed 2
-bend 72.0
+bend 60.0
 feed 2
-bend 72.0
-feed 2
-bend 72.0
-feed 2
-bend 72.0
-rotate 90
-feed 100
+bend 60.0
+feed 99.27339598314107
