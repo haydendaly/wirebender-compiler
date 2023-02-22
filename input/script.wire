@@ -3,12 +3,12 @@
     (var interior_angle (/ (* (- (* 2 sides) 4) 90) sides))
     (repeat sides (
         (feed 13)
-        (bend 60)
+        (bend (- 180 36))
         (rotate -12)
     ))
 ))
 
-(repeat 10 (polygon 6))
+(repeat 10 (polygon 10))
 
 # Lever 1 and 2
 (feed 100)
