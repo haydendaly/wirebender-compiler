@@ -2,13 +2,13 @@
 (def polygon (sides) (
     (var interior_angle (/ (* (- (* 2 sides) 4) 90) sides))
     (repeat sides (
-        (feed 2)
+        (feed 13)
         (bend interior_angle)
         (rotate -3)
     ))
 ))
 
-(repeat 10 (polygon 10))
+(repeat 10 (polygon 6))
 
 # Lever 1 and 2
 (feed 100)
