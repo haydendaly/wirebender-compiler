@@ -4,7 +4,7 @@
     (repeat sides (
         (feed 13)
         (bend interior_angle)
-        (rotate -3)
+        (rotate -6)
     ))
 ))
 
