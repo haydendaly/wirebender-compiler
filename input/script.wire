@@ -4,7 +4,7 @@
     (repeat sides (
         (feed 2)
         (bend 36)
-        (rotate -6)
+        (rotate -3)
     ))
 ))
 
