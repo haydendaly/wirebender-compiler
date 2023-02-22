@@ -113,5 +113,8 @@ class Interpreter:
     def compile(self):
         as_str = ""
         for line in self.result:
-            as_str += line + "\n"
+            try:
+                as_str += line + "\n"
+            except Exception as e:
+                print(line, e)
         return as_str
