@@ -2,7 +2,7 @@
 (def polygon (sides) (
     (var interior_angle (/ (* (- (* 2 sides) 4) 90) sides))
     (repeat sides (
-        (feed 5)
+        (feed 2)
         (bend 36)
         (rotate -6)
     ))
