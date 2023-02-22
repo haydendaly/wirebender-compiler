@@ -3,7 +3,7 @@
     (var interior_angle (/ (* (- (* 2 sides) 4) 90) sides))
     (repeat sides (
         (feed 5)
-        (bend (- 180 36))
+        (bend 36)
         (rotate -12)
     ))
 ))
