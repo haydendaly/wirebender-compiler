@@ -8,7 +8,7 @@
     ))
 ))
 
-(repeat 10 (polygon 10))
+(repeat 20 (polygon 10))
 
 # Lever 1 and 2
 (feed 100)
