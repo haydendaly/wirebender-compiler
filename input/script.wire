@@ -1,3 +1,4 @@
+(feed 10)
 # Spring
 (def polygon (sides) (
     (var interior_angle (/ (* (- (* 2 sides) 4) 90) sides))
@@ -8,7 +9,7 @@
     ))
 ))
 
-(repeat 20 (polygon 10))
+(repeat 100 (polygon 10))
 
 # Lever 1 and 2
-(feed 100)
+(feed 50)
