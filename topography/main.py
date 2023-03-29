@@ -23,13 +23,10 @@ def find_local_min(mountain_range: np.ndarray) -> list:
     path = [((i, j), 0, 0)]
 
     def neighbors(i, j):
-        for x in range(-1, 2):
-            for y in range(-1, 2):
-                if x == 0 and y == 0:
-                    continue
-                ni, nj = i + x, j + y
-                if 0 <= ni < height and 0 <= nj < width:
-                    yield ni, nj
+        for x, y in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            ni, nj = i + x, j + y
+            if 0 <= ni < height and 0 <= nj < width:
+                yield ni, nj
 
     while True:
         min_neighbor = None
@@ -74,6 +71,7 @@ def path_to_wirebender_format(path: list) -> str:
             v1_xy[2] = 0
             v2_xy[2] = 0
             rotate_angle = np.degrees(np.arccos(np.dot(v1_xy, v2_xy) / (np.linalg.norm(v1_xy) * np.linalg.norm(v2_xy))))
+            rotate_angle = round(rotate_angle / 90) * 90
             wirebender_commands.append(f"rotate {rotate_angle:.2f}")
 
     return "\n".join(wirebender_commands)
@@ -111,7 +109,7 @@ def plot_topography_3d(mountain_range: np.ndarray, local_min_path: list = None):
     plt.show()
 
 if __name__ == "__main__":
-    mountain_range = generate_mountain_range(40)
+    mountain_range = generate_mountain_range(10)
     local_min_path = find_local_min(mountain_range)
 
     plot_topography_3d(mountain_range, local_min_path)
