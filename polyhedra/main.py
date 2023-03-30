@@ -1,11 +1,53 @@
 import numpy as np
 from scipy.spatial.distance import pdist, squareform
 from itertools import permutations
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import pyvista as pv
 
-def generate_polyhedron(vertices, faces):
-    radius = 1
-    vertices = (vertices / np.linalg.norm(vertices, axis=1)[:, np.newaxis]) * radius
-    return vertices, faces
+def distance_between_points(a, b):
+    return np.linalg.norm(a - b)
+
+def get_neighbors(vertex, faces):
+    neighbors = set()
+    for face in faces:
+        if vertex in face:
+            neighbors.update(face)
+    neighbors.remove(vertex)
+    return list(neighbors)
+
+def is_connected(vertex_a, vertex_b, faces):
+    for face in faces:
+        if vertex_a in face and vertex_b in face:
+            return True
+    return False
+
+def min_path_to_visit_all_vertices(vertices, faces):
+    n = len(vertices)
+    visited = [False] * n
+    visited[0] = True
+    max_path, _ = dfs([0], visited, vertices, faces, 0)
+
+    return max_path
+
+def dfs(current_path, visited, vertices, faces, path_length):
+    if all(visited):
+        return current_path, len(current_path)
+
+    max_path = current_path
+    max_path_length = len(current_path)
+
+    for i in range(len(vertices)):
+        if not visited[i] and is_connected(current_path[-1], i, faces):
+            visited[i] = True
+            new_path, new_path_length = dfs(current_path + [i], visited, vertices, faces, path_length + distance_between_points(vertices[current_path[-1]], vertices[i]))
+            if new_path_length > max_path_length:
+                max_path = new_path
+                max_path_length = new_path_length
+            visited[i] = False
+
+    return max_path, max_path_length
+
 
 def traveling_salesman(vertices):
     num_vertices = len(vertices)
@@ -21,48 +63,96 @@ def traveling_salesman(vertices):
 
     return min_path
 
-def polyhedron_to_wirebender_format(vertices, faces):
-    min_path = traveling_salesman(vertices)
-    path = [vertices[i] for i in min_path]
-    path.append(path[0])  # Close the path
-    wirebender_commands = []
+def angle_between_vectors(vector_a, vector_b):
+    dot_product = np.dot(vector_a, vector_b)
+    magnitude_a = np.linalg.norm(vector_a)
+    magnitude_b = np.linalg.norm(vector_b)
+    cos_angle = dot_product / (magnitude_a * magnitude_b)
+    angle = np.degrees(np.arccos(cos_angle))
+    return angle
 
+def wirebender_to_coordinates(wirebender_string: str):
+    coordinates = [(0, 0, 0)]
+    direction = np.array([1, 0, 0])  # initial direction is along x-axis
+
+    wirebender_lines = wirebender_string.split('\n')
+
+    for line in wirebender_lines:
+        opcode, value = line.split()
+        value = float(value)
+
+        if opcode == 'feed':
+            displacement = value * direction
+            coordinates.append(coordinates[-1] + displacement)
+        elif opcode == 'rotate':
+            angle_a = np.radians(value)
+            rotation_matrix = np.array([
+                [np.cos(angle_a), -np.sin(angle_a), 0],
+                [np.sin(angle_a), np.cos(angle_a), 0],
+                [0, 0, 1],
+            ])
+            direction = rotation_matrix @ direction
+        elif opcode == 'bend':
+            angle_b = np.radians(value)
+            rotation_matrix = np.array([
+                [1, 0, 0],
+                [0, np.cos(angle_b), -np.sin(angle_b)],
+                [0, np.sin(angle_b), np.cos(angle_b)],
+            ])
+            direction = rotation_matrix @ direction
+
+    return coordinates
+
+
+def plot_wirebender_path(wirebender_path: list):
+    coordinates = wirebender_to_coordinates(wirebender_path)
+    x, y, z = zip(*coordinates)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    ax.plot(x, y, z, marker='o', markersize=5, linestyle='-', color='red', linewidth=2)
+
+    ax.set_xlabel("X (mm)")
+    ax.set_ylabel("Y (mm)")
+    ax.set_zlabel("Z (mm)")
+    plt.show()
+
+def polyhedra_to_wirebender(vertices, faces, path):
+    instructions = []
     for i in range(len(path) - 1):
-        p1, p2 = np.array(path[i]), np.array(path[i + 1])
-        diff = p2 - p1
+        start_vertex = vertices[path[i]]
+        end_vertex = vertices[path[i + 1]]
+        angle = np.arccos(np.dot(start_vertex, end_vertex) / (np.linalg.norm(start_vertex) * np.linalg.norm(end_vertex)))
+        axis = np.cross(start_vertex, end_vertex)
+        axis /= np.linalg.norm(axis)
+        rotation_angle = np.degrees(angle)
+        instructions.append(f"rotate {rotation_angle:.2f}")
+        instructions.append(f"bend {180 - 2 * rotation_angle:.2f}")
+        feed_distance = np.linalg.norm(end_vertex - start_vertex)
+        instructions.append(f"feed {feed_distance:.2f}")
+    return "\n".join(instructions)
 
-        feed = np.linalg.norm(diff)
-        wirebender_commands.append(f"feed {feed:.2f}")
+def generate_polyhedra(polyhedron_name):
+    if polyhedron_name == 'tetrahedron':
+        poly = pv.Tetrahedron()
+    elif polyhedron_name == 'cube':
+        poly = pv.Cube()
+    elif polyhedron_name == 'octahedron':
+        poly = pv.Octahedron()
+    elif polyhedron_name == 'dodecahedron':
+        poly = pv.Dodecahedron()
+    elif polyhedron_name == 'icosahedron':
+        poly = pv.Icosahedron()
+    else:
+        raise ValueError("Invalid polyhedron name")
+    
+    vertices = poly.points
+    faces = poly.faces.reshape(-1, 4)[:, 1:]
 
-        if i < len(path) - 2:
-            p3 = np.array(path[i + 2])
-            v1, v2 = p2 - p1, p3 - p2
-            bend_angle = np.degrees(np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))))
-            wirebender_commands.append(f"bend {bend_angle:.2f}")
+    return vertices, faces
 
-            v1_xy, v2_xy = v1.copy(), v2.copy()
-            v1_xy[2] = 0
-            v2_xy[2] = 0
-            rotate_angle = np.degrees(np.arccos(np.dot(v1_xy, v2_xy) / (np.linalg.norm(v1_xy) * np.linalg.norm(v2_xy))))
-            wirebender_commands.append(f"rotate {rotate_angle:.2f}")
-
-    return "\n".join(wirebender_commands)
-
-# tetrahedron
-vertices = np.array([
-    [1, 1, 1],
-    [1, -1, -1],
-    [-1, 1, -1],
-    [-1, -1, 1]
-])
-
-faces = [
-    (0, 1, 2),
-    (0, 1, 3),
-    (0, 2, 3),
-    (1, 2, 3)
-]
-
-vertices, faces = generate_polyhedron(vertices, faces)
-wirebender_script = polyhedron_to_wirebender_format(vertices, faces)
-print(wirebender_script)
+vertices, faces = generate_polyhedra("icosahedron")
+path = min_path_to_visit_all_vertices(vertices, faces)
+wirebender_script = polyhedra_to_wirebender(vertices, faces, path)
+plot_wirebender_path(wirebender_script)
