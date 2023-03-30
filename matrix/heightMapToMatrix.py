@@ -26,7 +26,9 @@ def imgToPrunedMatrix(pixelSkipStep, maxHeight, image):
 
     return matOut
 
-# prunedMatrix = imgToPrunedMatrix(3, 100, 'denaliHeightMap.png')
+prunedMatrix = imgToPrunedMatrix(7, 50, 'denaliHeightMap.png')
+
+np.save('denali_skip7_max50mm.npy', prunedMatrix)
 
 # plt.imshow(prunedMatrix, cmap='gray')
 # plt.show()
