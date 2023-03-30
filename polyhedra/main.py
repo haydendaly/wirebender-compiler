@@ -71,9 +71,33 @@ def angle_between_vectors(vector_a, vector_b):
     angle = np.degrees(np.arccos(cos_angle))
     return angle
 
+class Wire:
+    def __init__(self):
+        self.vertices = [(0, 0, 0)]
+        self.direction = np.array([1, 0, 0])
+
+    def rotate(self, angle):
+        rotation_matrix = np.array([
+            [np.cos(angle), -np.sin(angle), 0],
+            [np.sin(angle), np.cos(angle), 0],
+            [0, 0, 1],
+        ])
+        self.direction = rotation_matrix @ self.direction
+
+    def bend(self, angle):
+        rotation_matrix = np.array([
+            [1, 0, 0],
+            [0, np.cos(angle), -np.sin(angle)],
+            [0, np.sin(angle), np.cos(angle)],
+        ])
+        self.direction = rotation_matrix @ self.direction
+
+    def feed(self, value):
+        displacement = value * self.direction
+        self.vertices.append(self.vertices[-1] + displacement)
+
 def wirebender_to_coordinates(wirebender_string: str):
-    coordinates = [(0, 0, 0)]
-    direction = np.array([1, 0, 0])  # initial direction is along x-axis
+    wire = Wire()
 
     wirebender_lines = wirebender_string.split('\n')
 
@@ -82,26 +106,15 @@ def wirebender_to_coordinates(wirebender_string: str):
         value = float(value)
 
         if opcode == 'feed':
-            displacement = value * direction
-            coordinates.append(coordinates[-1] + displacement)
+            wire.feed(value)
         elif opcode == 'rotate':
             angle_a = np.radians(value)
-            rotation_matrix = np.array([
-                [np.cos(angle_a), -np.sin(angle_a), 0],
-                [np.sin(angle_a), np.cos(angle_a), 0],
-                [0, 0, 1],
-            ])
-            direction = rotation_matrix @ direction
+            wire.rotate(angle_a)
         elif opcode == 'bend':
             angle_b = np.radians(value)
-            rotation_matrix = np.array([
-                [1, 0, 0],
-                [0, np.cos(angle_b), -np.sin(angle_b)],
-                [0, np.sin(angle_b), np.cos(angle_b)],
-            ])
-            direction = rotation_matrix @ direction
+            wire.bend(angle_b)
 
-    return coordinates
+    return wire.vertices
 
 
 def plot_wirebender_path(wirebender_path: list):
@@ -155,4 +168,5 @@ def generate_polyhedra(polyhedron_name):
 vertices, faces = generate_polyhedra("icosahedron")
 path = min_path_to_visit_all_vertices(vertices, faces)
 wirebender_script = polyhedra_to_wirebender(vertices, faces, path)
+print(wirebender_script)
 plot_wirebender_path(wirebender_script)

@@ -10,19 +10,37 @@ from scipy.ndimage import zoom
 
 from matrix import imgToPrunedMatrix
 
-def generate_mountain_range(size: int, scale: float = 0.05, octaves: int = 2, persistence: float = 2, lacunarity: float = 0.5):
+
+def generate_mountain_range(
+    size: int,
+    scale: float = 0.05,
+    octaves: int = 2,
+    persistence: float = 2,
+    lacunarity: float = 0.5,
+):
     mountain_range = np.zeros((size, size))
     for i in range(size):
         for j in range(size):
-            mountain_range[i, j] = pnoise2(i * scale, j * scale, octaves=octaves, persistence=persistence, lacunarity=lacunarity, repeatx=size, repeaty=size)
-    mountain_range = (mountain_range - mountain_range.min()) / (mountain_range.max() - mountain_range.min())
+            mountain_range[i, j] = pnoise2(
+                i * scale,
+                j * scale,
+                octaves=octaves,
+                persistence=persistence,
+                lacunarity=lacunarity,
+                repeatx=size,
+                repeaty=size,
+            )
+    mountain_range = (mountain_range - mountain_range.min()) / (
+        mountain_range.max() - mountain_range.min()
+    )
     return mountain_range * 10
+
 
 def find_local_min(mountain_range: np.ndarray) -> list:
     height, width = mountain_range.shape
     max_index = np.unravel_index(np.argmax(mountain_range), mountain_range.shape)
     i, j = max_index
-    path = [((i, j), 0, 0)]
+    path = [((i, j), 0)]
 
     def neighbors(i, j):
         for x in range(-1, 2):
@@ -52,18 +70,21 @@ def find_local_min(mountain_range: np.ndarray) -> list:
             break
 
         height_diff = current_height - min_height
-        hypotenuse = np.sqrt(height_diff ** 2 + 1)
+        hypotenuse = np.sqrt(height_diff**2 + 1)
         angle = np.degrees(np.arcsin(height_diff / hypotenuse))
-        path.append(((ni, nj), hypotenuse, angle))
+        path.append(((ni, nj), height_diff))
         i, j = ni, nj
 
     return path
 
-def find_local_min_sgd(mountain_range: np.ndarray, learning_rate: float = 0.1, num_iterations: int = 1000) -> list:
+
+def find_local_min_sgd(
+    mountain_range: np.ndarray, learning_rate: float = 0.1, num_iterations: int = 1000
+) -> list:
     height, width = mountain_range.shape
     max_index = np.unravel_index(np.argmax(mountain_range), mountain_range.shape)
     i, j = max_index
-    path = [((i, j), 0, 0)]
+    path = [((i, j), 0)]
 
     def gradient(i, j):
         di, dj = 0, 0
@@ -86,6 +107,7 @@ def find_local_min_sgd(mountain_range: np.ndarray, learning_rate: float = 0.1, n
 
     return path
 
+
 def local_min_to_wirebender(local_min_path: list, unit_length: float = 1.0) -> str:
     wirebender_commands = []
 
@@ -94,15 +116,19 @@ def local_min_to_wirebender(local_min_path: list, unit_length: float = 1.0) -> s
         (x2, y2), z_diff2 = local_min_path[i + 1]
         dx, dy = (x2 - x1) * unit_length, (y2 - y1) * unit_length
         dz = (z_diff2 - z_diff1) * unit_length
-        feed_distance = np.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
+        feed_distance = np.sqrt(dx**2 + dy**2 + dz**2)
         wirebender_commands.append(f"feed {feed_distance:.2f}")
 
         if i < len(local_min_path) - 2:
             (x3, y3), z_diff3 = local_min_path[i + 2]
             angle_xy = np.degrees(np.arctan2(y3 - y2, x3 - x2))
-            angle_z = np.degrees(np.arctan2(z_diff3 - z_diff2, np.sqrt((x3 - x2) ** 2 + (y3 - y2) ** 2)))
-            wirebender_commands.append(f"bend {angle_xy:.2f}")
-            wirebender_commands.append(f"rotate {angle_z:.2f}")
+            angle_z = np.degrees(
+                np.arctan2(z_diff3 - z_diff2, np.sqrt((x3 - x2) ** 2 + (y3 - y2) ** 2))
+            )
+            bend_angle = angle_xy - np.degrees(np.arctan2(dy, dx))
+            rotate_angle = angle_z
+            wirebender_commands.append(f"rotate {rotate_angle:.2f}")
+            wirebender_commands.append(f"bend {bend_angle:.2f}")
 
     return "\n".join(wirebender_commands)
 
@@ -112,12 +138,23 @@ def plot_topography_3d(mountain_range: np.ndarray, local_min_path: list = None):
     X, Y = np.meshgrid(np.arange(0, width), np.arange(0, height))
 
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
 
     ax.plot_surface(X, Y, mountain_range, cmap="terrain", alpha=0.7)
     if local_min_path:
-        x_coords, y_coords, z_coords = zip(*[(x, y, mountain_range[x, y] + 2) for (x, y), _, _ in local_min_path])
-        ax.plot(y_coords, x_coords, z_coords, marker='o', markersize=5, linestyle='-', color='red', linewidth=2)
+        x_coords, y_coords, z_coords = zip(
+            *[(x, y, mountain_range[x, y] + 2) for (x, y), _, _ in local_min_path]
+        )
+        ax.plot(
+            y_coords,
+            x_coords,
+            z_coords,
+            marker="o",
+            markersize=5,
+            linestyle="-",
+            color="red",
+            linewidth=2,
+        )
 
     ax.view_init(azim=120, elev=30)
     ax.set_xlabel("X (mm)")
@@ -125,14 +162,18 @@ def plot_topography_3d(mountain_range: np.ndarray, local_min_path: list = None):
     ax.set_zlabel("Z (mm)")
     plt.show()
 
+
 ZOOM = 1
 if __name__ == "__main__":
     # mountain_range = generate_mountain_range(10)
-    mountain_range = imgToPrunedMatrix(7, 50, './matrix/denaliHeightMap.png')
+    mountain_range = imgToPrunedMatrix(7, 50, "./matrix/denaliHeightMap.png")
     mountain_range = zoom(mountain_range, (ZOOM, ZOOM))
     local_min_path_naive = find_local_min(mountain_range)
-    local_min_path_sgd = find_local_min_sgd(mountain_range, 3)
+    # local_min_path_sgd = find_local_min_sgd(mountain_range, 3)
 
-    plot_topography_3d(mountain_range, local_min_path_sgd)
-    plt.colorbar()
-    plt.show()
+    # plot_topography_3d(mountain_range, local_min_path_naive)
+    # plt.colorbar()
+    # plt.show()
+
+    print(local_min_path_naive)
+    print(local_min_to_wirebender(local_min_path_naive))
